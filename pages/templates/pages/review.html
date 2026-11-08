@@ -1,0 +1,39 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Catalog review | ClassroomHub{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Catalog review</h2>
+    <p style="color: var(--text-muted); margin-top: 0.25rem;">This page is available to authorized reviewers.</p>
+</div>
+
+<div class="grid-cards">
+    {% for resource in resources %}
+        <article class="resource resource-card">
+            <div>
+                <span class="badge-category">{{ resource.category.name }}</span>
+                <h3>{{ resource.title }}</h3>
+                {% if resource.description %}
+                    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">{{ resource.description }}</p>
+                {% endif %}
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Category: <strong>{{ resource.category.name }}</strong>
+                </p>
+            </div>
+            <div>
+                <p>Status:
+                    {% if resource.available %}
+                        <span class="badge-status badge-available">● Available</span>
+                    {% else %}
+                        <span class="badge-status badge-coming-soon">● Coming soon</span>
+                    {% endif %}
+                </p>
+            </div>
+        </article>
+    {% empty %}
+        <p style="color: var(--text-muted); grid-column: 1 / -1;">No resources are available.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
