@@ -3,7 +3,18 @@
 {% block title %}About | ClassroomHub{% endblock %}
 
 {% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
     <h2>About this project</h2>
-    <p>{{ purpose }}</p>
-    <p>This site was built as a Django learning exercise.</p>
+    <p style="font-size: 1.1rem; color: var(--text-muted); margin: 1rem 0;">{{ purpose }}</p>
+    <p style="color: var(--text-muted); line-height: 1.7;">
+        This site was built as a Django learning exercise. It demonstrates user authentication, session state management, group-based authorization, and permissions using Django built-in capabilities and MySQL/MariaDB database.
+    </p>
+
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 1rem; flex-wrap: wrap;">
+        <span class="badge-category">Django 6.1</span>
+        <span class="badge-category">MySQL / MariaDB</span>
+        <span class="badge-category">Sessions</span>
+        <span class="badge-category">Permissions & Groups</span>
+    </div>
+</div>
 {% endblock %}

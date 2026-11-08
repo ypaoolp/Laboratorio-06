@@ -3,11 +3,15 @@
 {% block title %}Home | ClassroomHub{% endblock %}
 
 {% block content %}
-    <h2>Welcome</h2>
-    <p>{{ welcome_message }}</p>
+<div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(to bottom, #ffffff, #f1f5f9);">
+    <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem;">Welcome to ClassroomHub</h2>
+    <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem auto;">
+        {{ welcome_message }}
+    </p>
     <p>
-        <a href="{% url 'pages:resources' %}">
-            Explore resources
+        <a href="{% url 'pages:resources' %}" style="display: inline-block; background-color: var(--primary); color: white; padding: 0.85rem 1.75rem; font-weight: 600; border-radius: 8px; text-decoration: none; box-shadow: var(--shadow-sm); transition: background-color 0.2s;">
+            Explore resources →
         </a>
     </p>
+</div>
 {% endblock %}
