@@ -4,52 +4,399 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ClassroomHub{% endblock %}</title>
+
     <style>
-        body {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 24px;
-            font-family: Arial, sans-serif;
-            line-height: 1.5;
-            color: #17202a;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --secondary: #0f172a;
+            --surface: #ffffff;
+            --background: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-dark: #dc2626;
+            --danger-light: #fef2f2;
+            --success: #10b981;
+            --success-light: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+            --radius: 10px;
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background-color: #0f172a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .nav-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .brand-link {
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-link:hover {
+            color: #93c5fd;
+        }
+
         nav {
             display: flex;
-            gap: 20px;
-            border-bottom: 1px solid #d5d8dc;
-            padding-bottom: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
+
         nav a {
-            color: #1b4f72;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 0.85rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .nav-badge {
+            background: #1e293b;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .nav-logout-form {
+            display: inline-block;
+            margin: 0;
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            color: #ffffff;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc2626;
+        }
+
+        /* MAIN CONTENT */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        /* CARD CONTAINERS & PANELS */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-auth {
+            max-width: 480px;
+            margin: 2rem auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-auth h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+
+        /* FORMS */
+        form p {
+            margin-bottom: 1.15rem;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+            color: var(--text-main);
+        }
+
+        form input[type="text"],
+        form input[type="password"],
+        form input[type="email"] {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .helptext {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+            line-height: 1.4;
+        }
+
+        ul.errorlist {
+            list-style: none;
+            padding: 0.5rem 0.75rem;
+            margin: 0.4rem 0;
+            background-color: var(--danger-light);
+            border-left: 3px solid var(--danger);
+            border-radius: 4px;
+            color: var(--danger-dark);
+            font-size: 0.85rem;
+        }
+
+        .alert-error {
+            background-color: var(--danger-light);
+            border: 1px solid #fecaca;
+            color: var(--danger-dark);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.25rem;
+            font-weight: 500;
+            font-size: 0.92rem;
+        }
+
+        button[type="submit"] {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.7rem 1.25rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease, transform 0.1s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: var(--primary-dark);
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.99);
+        }
+
+        .auth-footer {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
             text-decoration: none;
         }
-        main {
-            padding: 20px 0;
+
+        .auth-footer a:hover {
+            text-decoration: underline;
         }
-        .resource {
-            border: 1px solid #d5d8dc;
+
+        /* GRID FOR RESOURCES & CARDS */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .resource-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .resource-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .badge-category {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
             border-radius: 6px;
-            padding: 14px;
-            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .badge-available {
+            background: var(--success-light);
+            color: #065f46;
+        }
+
+        .badge-coming-soon {
+            background: var(--warning-light);
+            color: #92400e;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.875rem;
+            margin-top: auto;
+            border-top: 1px solid #1e293b;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            nav {
+                justify-content: center;
+            }
         }
     </style>
 </head>
+
 <body>
     <header>
-        <h1>ClassroomHub</h1>
-        <nav aria-label="Main navigation">
-            <a href="{% url 'pages:home' %}">Home</a>
-            <a href="{% url 'pages:resources' %}">Resources</a>
-            <a href="{% url 'pages:about' %}">About</a>
-        </nav>
+        <div class="nav-wrapper">
+            <a href="{% url 'pages:home' %}" class="brand-link">
+                🎓 ClassroomHub
+            </a>
+
+            <nav aria-label="Main navigation">
+                <a href="{% url 'pages:home' %}">Home</a>
+                <a href="{% url 'pages:resources' %}">Resources</a>
+                <a href="{% url 'pages:about' %}">About</a>
+
+                {% if user.is_authenticated %}
+                    <span class="nav-badge">👤 {{ user.username }}</span>
+                    <a href="{% url 'pages:dashboard' %}">Dashboard</a>
+                    <a href="{% url 'pages:dashboard-summary' %}">Summary</a>
+                    {% if perms.pages.view_resource %}
+                        <a href="{% url 'pages:resource-review' %}">Review</a>
+                    {% endif %}
+                    <form method="post" action="{% url 'pages:logout' %}" class="nav-logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-logout">Log out</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'pages:login' %}">Log in</a>
+                    <a href="{% url 'pages:signup' %}">Sign up</a>
+                {% endif %}
+            </nav>
+        </div>
     </header>
 
     <main>
-        {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </main>
 
     <footer>
-        <small>ClassroomHub — Learning project</small>
+        <p>© 2026 ClassroomHub · Educational Platform · Learning Together</p>
     </footer>
 </body>
 </html>
