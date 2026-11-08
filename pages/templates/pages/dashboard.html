@@ -1,0 +1,40 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Dashboard | ClassroomHub{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <h2>Your dashboard</h2>
+    <p style="margin-top: 0.5rem; color: var(--text-muted);">
+        Signed in as: <strong>{{ user.username }}</strong>
+    </p>
+    <p style="color: var(--text-muted);">
+        Visits in this session: <span style="background: var(--primary-light); color: var(--primary-dark); font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 6px;">{{ visit_count }}</span>
+    </p>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 0.5rem;">
+        This page requires an authenticated account.
+    </p>
+</div>
+
+<div class="grid-cards">
+    <div class="card" style="border-top: 4px solid var(--primary);">
+        <h3 style="margin-bottom: 0.5rem;">📚 Catalog Resources</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Browse public educational materials available in ClassroomHub.</p>
+        <a href="{% url 'pages:resources' %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">View catalog →</a>
+    </div>
+
+    <div class="card" style="border-top: 4px solid var(--success);">
+        <h3 style="margin-bottom: 0.5rem;">📊 Resources Summary</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">View real-time ORM metrics on catalog resources availability.</p>
+        <a href="{% url 'pages:dashboard-summary' %}" style="color: var(--success); font-weight: 600; text-decoration: none;">View summary →</a>
+    </div>
+
+    {% if perms.pages.view_resource %}
+    <div class="card" style="border-top: 4px solid #8b5cf6;">
+        <h3 style="margin-bottom: 0.5rem;">🔍 Catalog Review</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Access authorized reviewer panel with full catalog inspection.</p>
+        <a href="{% url 'pages:resource-review' %}" style="color: #8b5cf6; font-weight: 600; text-decoration: none;">Review catalog →</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
