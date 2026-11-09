@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
@@ -82,37 +83,52 @@ def dashboard_summary(request):
 # =============================================================================
 
 
+class EditorAccessMixin(LoginRequiredMixin, PermissionRequiredMixin):
+    """
+    Diferencia el acceso:
+    - Redirige a login (HTTP 302) a usuarios anónimos.
+    - Emite HTTP 403 Forbidden a usuarios autenticados sin el permiso requerido.
+    """
+    raise_exception = True
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(
+                self.request.get_full_path(),
+                self.get_login_url(),
+                self.get_redirect_field_name(),
+            )
+        return super().handle_no_permission()
+
+
 class ResourceDetailView(DetailView):
     model = Resource
     template_name = "pages/resource_detail.html"
     context_object_name = "resource"
 
 
-class ResourceCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class ResourceCreateView(EditorAccessMixin, CreateView):
     model = Resource
     form_class = ResourceForm
     template_name = "pages/resource_form.html"
     permission_required = "pages.add_resource"
-    raise_exception = True
 
     def get_success_url(self):
         return reverse_lazy("pages:resource-detail", kwargs={"pk": self.object.pk})
 
 
-class ResourceUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ResourceUpdateView(EditorAccessMixin, UpdateView):
     model = Resource
     form_class = ResourceForm
     template_name = "pages/resource_form.html"
     permission_required = "pages.change_resource"
-    raise_exception = True
 
     def get_success_url(self):
         return reverse_lazy("pages:resource-detail", kwargs={"pk": self.object.pk})
 
 
-class ResourceDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class ResourceDeleteView(EditorAccessMixin, DeleteView):
     model = Resource
     template_name = "pages/resource_confirm_delete.html"
     permission_required = "pages.delete_resource"
-    raise_exception = True
     success_url = reverse_lazy("pages:resources")

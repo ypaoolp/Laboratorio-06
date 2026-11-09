@@ -1,8 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% block title %}
-    {% if object %}Edit {{ object.title }} | ClassroomHub{% else %}New Resource | ClassroomHub{% endblock %}
-{% endblock %}
+{% block title %}{% if object %}Edit {{ object.title }} | ClassroomHub{% else %}New Resource | ClassroomHub{% endif %}{% endblock %}
 
 {% block content %}
 <div class="card-auth" style="max-width: 650px;">
