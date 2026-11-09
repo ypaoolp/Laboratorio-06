@@ -1,56 +1,65 @@
 # ClassroomHub
 
-**ClassroomHub** es un portal web didáctico para recursos de aprendizaje y proyectos, desarrollado sobre **Django 6.1.3** y conectado a **MySQL/MariaDB**. Demuestra la arquitectura **MTV** (Model-Template-View), autenticación de usuarios, gestión de sesiones del lado del servidor, grupos y autorización basada en permisos del framework.
+**ClassroomHub** es un portal web didáctico para recursos de aprendizaje y proyectos, desarrollado sobre **Django 6.1.3** y conectado a **MySQL/MariaDB**. Demuestra la arquitectura **MTV** (Model-Template-View), autenticación de usuarios, gestión de sesiones del lado del servidor, grupos, permisos del framework y un **CRUD completo** con vistas basadas en clases (CBV) y `ModelForm`.
 
 ---
 
-## 📋 Requisitos Funcionales (Laboratorio 8)
+## 📋 Requisitos Funcionales (Laboratorios 06, 07, 08 y 09)
 
 | Código | Requisito | Comprobación | Implementación |
 |---|---|---|---|
-| **RF01** | Registro público de cuentas normales | El usuario se crea sin privilegios (`is_staff=False`, `is_superuser=False`) | `pages:signup` (`UserCreationForm`) |
-| **RF02** | Validación del formulario de registro | Rechazo de contraseñas no coincidentes o nombres repetidos | Validadores integrados de Django |
-| **RF03** | Login con herramientas Django | Credenciales válidas crean sesión del lado del servidor | `pages:login` (`LoginView`) |
-| **RF04** | Logout mediante POST | Cierre de sesión seguro con protección CSRF | `pages:logout` (`LogoutView`) |
-| **RF05** | Catálogo público | `/resources/` es accesible sin requerir autenticación | `pages:resources` (público) |
-| **RF06** | Panel privado | `/dashboard/` exige autenticación obligatoria | `pages:dashboard` (`@login_required`) |
-| **RF07** | Sesión en funcionamiento | Contador de visitas persistente durante la sesión | `request.session['dashboard_visits']` |
-| **RF08** | Grupo de revisión | Grupo `Catalog reviewers` con permiso `pages.view_resource` | `django.contrib.auth.models.Group` |
-| **RF09** | Control de acceso en servidor | Usuario sin permiso recibe HTTP 403 en `/resources/review/` | `@permission_required(..., raise_exception=True)` |
-| **RF10** | Compatibilidad con MySQL/MariaDB | Base de datos persistente en producción/desarrollo | `django.db.backends.mysql` |
-| **RF11** | Pruebas aisladas | Suite de pruebas ejecutada en base descartable | `test_classroom_hub` |
+| **RF01** | Catálogo público | `/resources/` accesible sin requerir sesión | `pages:resources` |
+| **RF02** | Detalle de recurso | Consulta pública de un recurso y su categoría | `pages:resource-detail` (`DetailView`) |
+| **RF03** | Formulario `ModelForm` | Validación y sanitización del título (`clean_title`) | `ResourceForm` (`pages/forms.py`) |
+| **RF04** | Creación de recursos | Alta de recursos protegida con `pages.add_resource` | `pages:resource-create` (`CreateView`) |
+| **RF05** | Edición de recursos | Modificación sin duplicar PK ni crear registros nuevos | `pages:resource-edit` (`UpdateView`) |
+| **RF06** | Eliminación de recursos | Confirmación previa por GET y eliminación por POST | `pages:resource-delete` (`DeleteView`) |
+| **RF07** | Registro y autenticación | Registro de usuarios comunes sin privilegios y Login/Logout | `UserCreationForm`, `LoginView`, `LogoutView` |
+| **RF08** | Panel privado | `/dashboard/` con contador de visitas en sesión | `pages:dashboard` (`@login_required`) |
+| **RF09** | Grupo Revisor | `Catalog reviewers` con permiso `pages.view_resource` | `django.contrib.auth.models.Group` |
+| **RF10** | Grupo Editor | `Catalog editors` con permisos completos de CRUD | `add_resource`, `change_resource`, `delete_resource` |
+| **RF11** | Control de acceso en servidor | Anónimos redirigidos a login (302), no autorizados reciben 403 | `EditorAccessMixin` + decoradores |
+| **RF12** | Manejo de registros inexistentes | Solicitudes a recursos que no existen responden HTTP 404 | Manejador 404 de Django |
+| **RF13** | Pruebas aisladas | Suite de 55 pruebas ejecutadas en base descartable | `test_classroom_hub` |
 
 ---
 
 ## 🌐 Mapa de Rutas de la Aplicación
 
-| Dirección URL | Nombre de Ruta | Acceso Requerido | Descripción |
-|---|---|---|---|
-| `/` | `pages:home` | Público | Página principal de bienvenida |
-| `/resources/` | `pages:resources` | Público | Catálogo general de recursos didácticos |
-| `/about/` | `pages:about` | Público | Información sobre el propósito del proyecto |
-| `/accounts/signup/` | `pages:signup` | Anónimo | Registro público mediante `UserCreationForm` |
-| `/accounts/login/` | `pages:login` | Anónimo | Inicio de sesión mediante `LoginView` (POST con CSRF) |
-| `/accounts/logout/` | `pages:logout` | Autenticado | Cierre de sesión seguro (`LogoutView`, solo POST) |
-| `/dashboard/` | `pages:dashboard` | Autenticado | Panel privado con contador de sesión (`@login_required`) |
-| `/dashboard/summary/` | `pages:dashboard-summary` | Autenticado | Resumen métrico de recursos vía ORM |
-| `/resources/review/` | `pages:resource-review` | Autenticado + `pages.view_resource` | Vista restringida de revisión de catálogo (403 para usuarios sin permiso) |
-| `/admin/` | `admin:index` | `is_staff=True` | Panel administrativo oficial de Django |
+| Dirección URL | Nombre de Ruta | Permiso / Acceso Requerido | Vista / Tipo | Descripción |
+|---|---|---|---|---|
+| `/` | `pages:home` | Público | `views.home` (FBV) | Página principal de bienvenida |
+| `/resources/` | `pages:resources` | Público | `views.resources` (FBV) | Catálogo general de recursos didácticos |
+| `/resources/<int:pk>/` | `pages:resource-detail` | Público | `ResourceDetailView` (CBV) | Vista de detalle de un recurso |
+| `/resources/new/` | `pages:resource-create` | Autenticado + `add_resource` | `ResourceCreateView` (CBV) | Formulario de creación de recurso |
+| `/resources/<int:pk>/edit/` | `pages:resource-edit` | Autenticado + `change_resource` | `ResourceUpdateView` (CBV) | Formulario de edición de recurso |
+| `/resources/<int:pk>/delete/` | `pages:resource-delete` | Autenticado + `delete_resource` | `ResourceDeleteView` (CBV) | Confirmación y eliminación de recurso |
+| `/resources/review/` | `pages:resource-review` | Autenticado + `view_resource` | `views.resource_review` (FBV) | Revisión de catálogo para revisores |
+| `/about/` | `pages:about` | Público | `views.about` (FBV) | Información del proyecto |
+| `/accounts/signup/` | `pages:signup` | Anónimo | `views.signup` (FBV) | Registro de nuevas cuentas |
+| `/accounts/login/` | `pages:login` | Anónimo | `LoginView` (CBV) | Inicio de sesión con CSRF |
+| `/accounts/logout/` | `pages:logout` | Autenticado (POST) | `LogoutView` (CBV) | Cierre de sesión seguro |
+| `/dashboard/` | `pages:dashboard` | Autenticado | `views.dashboard` (FBV) | Panel privado con contador de sesión |
+| `/dashboard/summary/` | `pages:dashboard-summary` | Autenticado | `views.dashboard_summary` (FBV) | Métricas agregadas con ORM |
+| `/admin/` | `admin:index` | `is_staff=True` | Django Admin | Administración general de modelos |
 
 ---
 
-## 🔐 Autenticación vs. Autorización
+## 👥 Configuración de Grupos y Permisos
 
-1. **Usuario SQL (`classroomhub_user`):** Utilizado internamente por Django en `settings.py` para conectarse a la base de datos MySQL/MariaDB. Los usuarios del sitio nunca se autentican con este usuario.
-2. **Usuario Django (`auth_user`):** Cuentas registradas de visitantes. Las contraseñas se almacenan procesadas con algoritmos seguros de hashing (PBKDF2/SHA256), nunca en texto plano.
-3. **Sesión (`django_session` / `sessionid`):** Al autenticarse, Django guarda la sesión en el servidor y entrega una cookie `sessionid` segura al navegador.
-4. **Grupo y Permisos (`Catalog reviewers`):** Permite autorizar funciones específicas (como `pages.view_resource`) en el servidor sin otorgar privilegios de administración (`is_staff`).
+### 1. `Catalog reviewers` (Solo lectura de revisión)
+- Permisos: `pages.view_resource`.
+- Capacidad: Acceder a `/resources/review/`. No puede crear, editar ni eliminar recursos.
 
----
+### 2. `Catalog editors` (Gestión completa del catálogo)
+- Permisos:
+  - `pages.view_resource`
+  - `pages.add_resource`
+  - `pages.change_resource`
+  - `pages.delete_resource`
+- Capacidad: Crear (`/resources/new/`), editar (`/resources/<pk>/edit/`) y eliminar (`/resources/<pk>/delete/`).
 
-## 👥 Preparación del Grupo de Revisores
-
-### Opción 1: Mediante Django Shell
+### Configuración desde Django Shell:
 ```bash
 python manage.py shell
 ```
@@ -60,32 +69,31 @@ from django.contrib.contenttypes.models import ContentType
 from pages.models import Resource
 from django.contrib.auth import get_user_model
 
-# 1. Obtener el permiso
 content_type = ContentType.objects.get_for_model(Resource)
-view_permission = Permission.objects.get(content_type=content_type, codename="view_resource")
+p_view = Permission.objects.get(content_type=content_type, codename="view_resource")
+p_add = Permission.objects.get(content_type=content_type, codename="add_resource")
+p_change = Permission.objects.get(content_type=content_type, codename="change_resource")
+p_delete = Permission.objects.get(content_type=content_type, codename="delete_resource")
 
-# 2. Crear grupo y asociar permiso
+# Grupo Revisores
 reviewers, _ = Group.objects.get_or_create(name="Catalog reviewers")
-reviewers.permissions.add(view_permission)
+reviewers.permissions.set([p_view])
 
-# 3. Asignar un usuario al grupo
+# Grupo Editores
+editors, _ = Group.objects.get_or_create(name="Catalog editors")
+editors.permissions.set([p_view, p_add, p_change, p_delete])
+
+# Asignar a un usuario
 User = get_user_model()
-user = User.objects.get(username="tu_usuario")
-user.groups.add(reviewers)
+editor_user = User.objects.get(username="tu_usuario")
+editor_user.groups.add(editors)
 ```
-
-### Opción 2: Mediante Django Admin
-1. Ingresa a `http://127.0.0.1:8000/admin/`.
-2. Dirígete a **Authentication and Authorization → Groups → Add group**.
-3. Nombra el grupo como **Catalog reviewers**.
-4. En la lista de permisos disponibles, selecciona **pages | resource | Can view resource** (`view_resource`) y guarda.
-5. Edita el usuario deseado y en la sección **Groups** agrégalo a **Catalog reviewers**.
 
 ---
 
-## 🛡️ Variables de Entorno y Seguridad
+## 🛠️ Entorno y Conexión a Base de Datos
 
-El archivo `.env` almacena las credenciales de la base de datos y la configuración sensible local. Este archivo está protegido en `.gitignore` para no ser incluido en Git:
+ClassroomHub utiliza **MySQL / MariaDB** configurado mediante variables de entorno en `.env`:
 
 ```env
 DB_NAME=classroomhub_db
@@ -97,12 +105,44 @@ DB_PORT=3306
 
 ---
 
-## 🧪 Ejecución de Pruebas Automatizadas
+## 🧪 Ejecución de la Suite de Pruebas
 
-La suite incluye **28 pruebas** automatizadas que cubren vistas públicas, modelos, relaciones protegidas, registro con validaciones, login, logout seguro por POST, sesiones y control de acceso 403:
+ClassroomHub cuenta con **55 pruebas automatizadas**:
+- **10 pruebas** del Laboratorio 07 (Modelos, relaciones `PROTECT`, representaciones y vistas).
+- **12 pruebas** de Autenticación y Sesiones (Registro, validación, login, logout POST, CSRF).
+- **6 pruebas** de Permisos y Revisión de Catálogo (HTTP 403, grupos).
+- **6 pruebas** de `ResourceForm` (Validación de título, longitud mínima, espacios en blanco, categorías).
+- **4 pruebas** de `ResourceDetailView` (Consulta pública, contenido, 404 para inexistentes).
+- **6 pruebas** de `ResourceCreateView` (Redirección anónima, 403 para usuarios sin permiso, alta exitosa y errores).
+- **6 pruebas** de `ResourceUpdateView` (Protección 403, persistencia sin duplicar PK, 404 en edición).
+- **5 pruebas** de `ResourceDeleteView` (Protección 403, GET no elimina, POST elimina y redirige).
+
+Para ejecutar las 55 pruebas en la base descartable `test_classroom_hub`:
 
 ```bash
+cd classroom-hub
+.\.venv\Scripts\Activate.ps1
 python manage.py test pages
 ```
 
-Las pruebas se ejecutan contra la base de datos descartable `test_classroom_hub`, aislando los datos de desarrollo.
+**Resultado esperado:**
+```text
+Creating test database for alias 'default'...
+.......................................................
+----------------------------------------------------------------------
+Ran 55 tests in ~240s
+
+OK
+Destroying test database for alias 'default'...
+Found 55 test(s).
+```
+
+---
+
+## 💻 Ejecución del Servidor Local
+
+```bash
+python manage.py runserver
+```
+
+Abre en tu navegador: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
