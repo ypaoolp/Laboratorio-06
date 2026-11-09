@@ -8,11 +8,15 @@ app_name = "pages"
 urlpatterns = [
     path("", views.home, name="home"),
     path("resources/", views.resources, name="resources"),
+    path("resources/new/", views.ResourceCreateView.as_view(), name="resource-create"),
     path(
         "resources/review/",
         views.resource_review,
         name="resource-review",
     ),
+    path("resources/<int:pk>/", views.ResourceDetailView.as_view(), name="resource-detail"),
+    path("resources/<int:pk>/edit/", views.ResourceUpdateView.as_view(), name="resource-edit"),
+    path("resources/<int:pk>/delete/", views.ResourceDeleteView.as_view(), name="resource-delete"),
     path("about/", views.about, name="about"),
     path("accounts/signup/", views.signup, name="signup"),
     path(

@@ -1,7 +1,11 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
+from .forms import ResourceForm
 from .models import Resource
 
 
@@ -71,3 +75,44 @@ def dashboard_summary(request):
         "available_resources": available_resources,
     }
     return render(request, "pages/summary.html", context)
+
+
+# =============================================================================
+# Class-Based Views (CBV) — Laboratorio 09 CRUD
+# =============================================================================
+
+
+class ResourceDetailView(DetailView):
+    model = Resource
+    template_name = "pages/resource_detail.html"
+    context_object_name = "resource"
+
+
+class ResourceCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Resource
+    form_class = ResourceForm
+    template_name = "pages/resource_form.html"
+    permission_required = "pages.add_resource"
+    raise_exception = True
+
+    def get_success_url(self):
+        return reverse_lazy("pages:resource-detail", kwargs={"pk": self.object.pk})
+
+
+class ResourceUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Resource
+    form_class = ResourceForm
+    template_name = "pages/resource_form.html"
+    permission_required = "pages.change_resource"
+    raise_exception = True
+
+    def get_success_url(self):
+        return reverse_lazy("pages:resource-detail", kwargs={"pk": self.object.pk})
+
+
+class ResourceDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Resource
+    template_name = "pages/resource_confirm_delete.html"
+    permission_required = "pages.delete_resource"
+    raise_exception = True
+    success_url = reverse_lazy("pages:resources")
