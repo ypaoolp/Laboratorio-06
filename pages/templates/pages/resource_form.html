@@ -1,0 +1,60 @@
+{% extends "pages/base.html" %}
+
+{% block title %}
+    {% if object %}Edit {{ object.title }} | ClassroomHub{% else %}New Resource | ClassroomHub{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="card-auth" style="max-width: 650px;">
+    <h2>
+        {% if object %}
+            ✏️ Edit Resource
+        {% else %}
+            ➕ New Resource
+        {% endif %}
+    </h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.92rem;">
+        {% if object %}
+            Update information for <strong>{{ object.title }}</strong>.
+        {% else %}
+            Fill in the details to publish a new learning resource in ClassroomHub.
+        {% endif %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert-error">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </p>
+        {% endfor %}
+
+        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1.5rem;">
+            <button type="submit" style="flex: 2;">
+                {% if object %}Save changes{% else %}Publish resource{% endif %}
+            </button>
+            <a href="{% if object %}{% url 'pages:resource-detail' pk=object.pk %}{% else %}{% url 'pages:resources' %}{% endif %}" style="flex: 1; text-align: center; color: var(--text-muted); font-weight: 600; text-decoration: none; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

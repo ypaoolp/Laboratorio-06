@@ -3,9 +3,19 @@
 {% block title %}Resources | ClassroomHub{% endblock %}
 
 {% block content %}
-<div class="card" style="margin-bottom: 2rem;">
-    <h2>Learning resources</h2>
-    <p style="color: var(--text-muted); margin-top: 0.25rem;">Browse the available learning materials.</p>
+<div class="card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h2>Learning resources</h2>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">Browse the available learning materials.</p>
+    </div>
+
+    {% if perms.pages.add_resource %}
+        <div>
+            <a href="{% url 'pages:resource-create' %}" style="background: var(--primary); color: #ffffff; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                ➕ New Resource
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <div class="grid-cards">
@@ -13,22 +23,46 @@
         <article class="resource resource-card">
             <div>
                 <span class="badge-category">{{ resource.category.name }}</span>
-                <h3>{{ resource.title }}</h3>
+                <h3>
+                    <a href="{% url 'pages:resource-detail' pk=resource.pk %}" style="color: var(--secondary); text-decoration: none;">
+                        {{ resource.title }}
+                    </a>
+                </h3>
                 {% if resource.description %}
-                    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">{{ resource.description }}</p>
+                    <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">{{ resource.description|truncatewords:20 }}</p>
                 {% endif %}
                 <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">
                     Category: <strong>{{ resource.category.name }}</strong>
                 </p>
             </div>
             <div>
-                <p>Status:
-                    {% if resource.available %}
-                        <span class="badge-status badge-available">● Available</span>
-                    {% else %}
-                        <span class="badge-status badge-coming-soon">● Coming soon</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                    <p>Status:
+                        {% if resource.available %}
+                            <span class="badge-status badge-available">● Available</span>
+                        {% else %}
+                            <span class="badge-status badge-coming-soon">● Coming soon</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.88rem;">
+                    <a href="{% url 'pages:resource-detail' pk=resource.pk %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                        Details →
+                    </a>
+
+                    {% if perms.pages.change_resource %}
+                        <a href="{% url 'pages:resource-edit' pk=resource.pk %}" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+                            Edit
+                        </a>
                     {% endif %}
-                </p>
+
+                    {% if perms.pages.delete_resource %}
+                        <a href="{% url 'pages:resource-delete' pk=resource.pk %}" style="color: var(--danger); font-weight: 600; text-decoration: none;">
+                            Delete
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </article>
     {% empty %}

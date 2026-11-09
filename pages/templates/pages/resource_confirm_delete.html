@@ -1,0 +1,36 @@
+{% extends "pages/base.html" %}
+
+{% block title %}Delete {{ resource.title }} | ClassroomHub{% endblock %}
+
+{% block content %}
+<div class="card-auth" style="max-width: 550px; border-top: 4px solid var(--danger);">
+    <h2 style="color: var(--danger-dark); border-bottom: 2px solid var(--danger-light);">
+        ⚠️ Confirm Deletion
+    </h2>
+
+    <p style="margin: 1.25rem 0; font-size: 1.05rem;">
+        Are you sure you want to permanently delete the resource:
+        <br>
+        <strong style="color: var(--secondary); font-size: 1.2rem; display: inline-block; margin-top: 0.5rem;">
+            "{{ resource.title }}"
+        </strong>?
+    </p>
+
+    <div style="background: var(--danger-light); border: 1px solid #fecaca; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1.75rem; font-size: 0.88rem; color: var(--danger-dark);">
+        Category: <strong>{{ resource.category.name }}</strong><br>
+        This action cannot be undone and will permanently remove this record from the catalog.
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button type="submit" style="background-color: var(--danger); flex: 2;">
+                Yes, delete resource
+            </button>
+            <a href="{% url 'pages:resource-detail' pk=resource.pk %}" style="flex: 1; text-align: center; color: var(--text-muted); font-weight: 600; text-decoration: none; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px;">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
