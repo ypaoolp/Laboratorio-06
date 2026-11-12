@@ -1,99 +1,103 @@
-# ClassroomHub
+# ClassroomHub - Plataforma de Recursos Didácticos
 
-**ClassroomHub** es un portal web didáctico para recursos de aprendizaje y proyectos, desarrollado sobre **Django 6.1.3** y conectado a **MySQL/MariaDB**. Demuestra la arquitectura **MTV** (Model-Template-View), autenticación de usuarios, gestión de sesiones del lado del servidor, grupos, permisos del framework y un **CRUD completo** con vistas basadas en clases (CBV) y `ModelForm`.
+**ClassroomHub** es una aplicación web interactiva orientada al intercambio y consulta de material educativo y proyectos académicos. La plataforma está implementada bajo el framework **Django (v6.1.3)** sobre un motor relacional **MySQL / MariaDB**, siguiendo rigurosamente el patrón de diseño **Modelo-Plantilla-Vista (MTV)**.
 
----
-
-## 📋 Requisitos Funcionales (Laboratorios 06, 07, 08 y 09)
-
-| Código | Requisito | Comprobación | Implementación |
-|---|---|---|---|
-| **RF01** | Catálogo público | `/resources/` accesible sin requerir sesión | `pages:resources` |
-| **RF02** | Detalle de recurso | Consulta pública de un recurso y su categoría | `pages:resource-detail` (`DetailView`) |
-| **RF03** | Formulario `ModelForm` | Validación y sanitización del título (`clean_title`) | `ResourceForm` (`pages/forms.py`) |
-| **RF04** | Creación de recursos | Alta de recursos protegida con `pages.add_resource` | `pages:resource-create` (`CreateView`) |
-| **RF05** | Edición de recursos | Modificación sin duplicar PK ni crear registros nuevos | `pages:resource-edit` (`UpdateView`) |
-| **RF06** | Eliminación de recursos | Confirmación previa por GET y eliminación por POST | `pages:resource-delete` (`DeleteView`) |
-| **RF07** | Registro y autenticación | Registro de usuarios comunes sin privilegios y Login/Logout | `UserCreationForm`, `LoginView`, `LogoutView` |
-| **RF08** | Panel privado | `/dashboard/` con contador de visitas en sesión | `pages:dashboard` (`@login_required`) |
-| **RF09** | Grupo Revisor | `Catalog reviewers` con permiso `pages.view_resource` | `django.contrib.auth.models.Group` |
-| **RF10** | Grupo Editor | `Catalog editors` con permisos completos de CRUD | `add_resource`, `change_resource`, `delete_resource` |
-| **RF11** | Control de acceso en servidor | Anónimos redirigidos a login (302), no autorizados reciben 403 | `EditorAccessMixin` + decoradores |
-| **RF12** | Manejo de registros inexistentes | Solicitudes a recursos que no existen responden HTTP 404 | Manejador 404 de Django |
-| **RF13** | Pruebas aisladas | Suite de 55 pruebas ejecutadas en base descartable | `test_classroom_hub` |
+El proyecto integra control de acceso basado en roles (RBAC), sesiones persistentes, formularios de validación con `ModelForm`, vistas genéricas basadas en clases (CBV) para operaciones CRUD y un set exhaustivo de 55 pruebas automatizadas.
 
 ---
 
-## 🌐 Mapa de Rutas de la Aplicación
+## 📌 Resumen de Capacidades y Objetivos (Labs 06 al 09)
 
-| Dirección URL | Nombre de Ruta | Permiso / Acceso Requerido | Vista / Tipo | Descripción |
+| ID | Capacidad | Comportamiento del Sistema | Componente Asociado |
+|:---:|---|---|---|
+| **RF01** | Catálogo Abierto | Acceso irrestricto al listado de recursos sin necesidad de inicio de sesión | `pages:resources` |
+| **RF02** | Ficha Informativa | Visualización en detalle de un recurso específico y su clasificación | `pages:resource-detail` (`DetailView`) |
+| **RF03** | Validación de Entradas | Sanitización de datos y validaciones de negocio en el título vía formulario | `ResourceForm` (`forms.py`) |
+| **RF04** | Registro de Material | Creación segura de recursos disponible solo con permiso `pages.add_resource` | `pages:resource-create` (`CreateView`) |
+| **RF05** | Actualización de Registros | Modificación de recursos existentes manteniendo la integridad de la clave primaria | `pages:resource-edit` (`UpdateView`) |
+| **RF06** | Baja de Recursos | Flujo de borrado en dos etapas: confirmación por GET y ejecución vía POST | `pages:resource-delete` (`DeleteView`) |
+| **RF07** | Gestión de Identidad | Registro público de usuarios estándar, autenticación y cierre de sesión seguro | `UserCreationForm`, `LoginView`, `LogoutView` |
+| **RF08** | Tablero Personal | Zona privada `/dashboard/` con tracking de visitas mediante variables de sesión | `pages:dashboard` |
+| **RF09** | Perfil Revisor | Grupo `Catalog reviewers` con atribuciones de inspección (`pages.view_resource`) | Grupos nativos de Django |
+| **RF10** | Perfil Editor | Grupo `Catalog editors` con control total de mantenimiento del catálogo | Permisos CRUD (`add`, `change`, `delete`) |
+| **RF11** | Seguridad por Capas | Filtros automáticos: anónimos van a login (302) y no autorizados reciben 403 | `EditorAccessMixin` y decoradores |
+| **RF12** | Manejo de Excepciones | Respuestas limpias con código HTTP 404 ante solicitudes de IDs inexistentes | Django 404 Handler |
+| **RF13** | Garantía de Calidad | Batería de 55 pruebas ejecutadas en un entorno de pruebas aislado y descartable | `test_classroom_hub` |
+
+---
+
+## 🗺️ Estructura de Rutas y Endpoints
+
+| Ruta URL | Identificador de Ruta | Nivel de Seguridad | Tipo de Vista | Función Principal |
 |---|---|---|---|---|
-| `/` | `pages:home` | Público | `views.home` (FBV) | Página principal de bienvenida |
-| `/resources/` | `pages:resources` | Público | `views.resources` (FBV) | Catálogo general de recursos didácticos |
-| `/resources/<int:pk>/` | `pages:resource-detail` | Público | `ResourceDetailView` (CBV) | Vista de detalle de un recurso |
-| `/resources/new/` | `pages:resource-create` | Autenticado + `add_resource` | `ResourceCreateView` (CBV) | Formulario de creación de recurso |
-| `/resources/<int:pk>/edit/` | `pages:resource-edit` | Autenticado + `change_resource` | `ResourceUpdateView` (CBV) | Formulario de edición de recurso |
-| `/resources/<int:pk>/delete/` | `pages:resource-delete` | Autenticado + `delete_resource` | `ResourceDeleteView` (CBV) | Confirmación y eliminación de recurso |
-| `/resources/review/` | `pages:resource-review` | Autenticado + `view_resource` | `views.resource_review` (FBV) | Revisión de catálogo para revisores |
-| `/about/` | `pages:about` | Público | `views.about` (FBV) | Información del proyecto |
-| `/accounts/signup/` | `pages:signup` | Anónimo | `views.signup` (FBV) | Registro de nuevas cuentas |
-| `/accounts/login/` | `pages:login` | Anónimo | `LoginView` (CBV) | Inicio de sesión con CSRF |
-| `/accounts/logout/` | `pages:logout` | Autenticado (POST) | `LogoutView` (CBV) | Cierre de sesión seguro |
-| `/dashboard/` | `pages:dashboard` | Autenticado | `views.dashboard` (FBV) | Panel privado con contador de sesión |
-| `/dashboard/summary/` | `pages:dashboard-summary` | Autenticado | `views.dashboard_summary` (FBV) | Métricas agregadas con ORM |
-| `/admin/` | `admin:index` | `is_staff=True` | Django Admin | Administración general de modelos |
+| `/` | `pages:home` | Libre | Función (FBV) | Portal de inicio y bienvenida |
+| `/resources/` | `pages:resources` | Libre | Función (FBV) | Listado general de recursos didácticos |
+| `/resources/<int:pk>/` | `pages:resource-detail` | Libre | Clase (`DetailView`) | Detalle individual del recurso seleccionado |
+| `/resources/new/` | `pages:resource-create` | Usuario con `add_resource` | Clase (`CreateView`) | Formulario para dar de alta nuevo material |
+| `/resources/<int:pk>/edit/` | `pages:resource-edit` | Usuario con `change_resource` | Clase (`UpdateView`) | Formulario de edición del material existente |
+| `/resources/<int:pk>/delete/` | `pages:resource-delete` | Usuario con `delete_resource` | Clase (`DeleteView`) | Pantalla de confirmación y eliminación |
+| `/resources/review/` | `pages:resource-review` | Usuario con `view_resource` | Función (FBV) | Vista especializada para revisión interna |
+| `/about/` | `pages:about` | Libre | Función (FBV) | Información general y créditos de la plataforma |
+| `/accounts/signup/` | `pages:signup` | Solo anónimos | Función (FBV) | Registro de nuevos usuarios en el sistema |
+| `/accounts/login/` | `pages:login` | Solo anónimos | Clase (`LoginView`) | Formulario de autenticación con protección CSRF |
+| `/accounts/logout/` | `pages:logout` | Sesión activa (POST) | Clase (`LogoutView`) | Desconexión segura de la cuenta |
+| `/dashboard/` | `pages:dashboard` | Requiere login | Función (FBV) | Panel del usuario con contador de actividad |
+| `/dashboard/summary/` | `pages:dashboard-summary` | Requiere login | Función (FBV) | Reporte analítico con agregaciones del ORM |
+| `/admin/` | `admin:index` | Administrador (`is_staff`) | Interfaz Django Admin | Panel administrativo centralizado |
 
 ---
 
-## 👥 Configuración de Grupos y Permisos
+## 🔐 Esquema de Seguridad y Roles de Usuario
 
-### 1. `Catalog reviewers` (Solo lectura de revisión)
-- Permisos: `pages.view_resource`.
-- Capacidad: Acceder a `/resources/review/`. No puede crear, editar ni eliminar recursos.
+El sistema delega la gestión de accesos en el subsistema `django.contrib.auth`:
 
-### 2. `Catalog editors` (Gestión completa del catálogo)
-- Permisos:
-  - `pages.view_resource`
-  - `pages.add_resource`
-  - `pages.change_resource`
-  - `pages.delete_resource`
-- Capacidad: Crear (`/resources/new/`), editar (`/resources/<pk>/edit/`) y eliminar (`/resources/<pk>/delete/`).
+### Perfiles de Acceso:
+1. **Revisores (`Catalog reviewers`)**:
+   - Permiso asignado: `pages.view_resource`.
+   - Alcance: Pueden consultar la vista protegida de revisión (`/resources/review/`). No poseen facultades para alterar datos.
 
-### Configuración desde Django Shell:
+2. **Editores (`Catalog editors`)**:
+   - Permisos asignados: `pages.view_resource`, `pages.add_resource`, `pages.change_resource`, `pages.delete_resource`.
+   - Alcance: Tienen acceso irrestricto a los formularios de creación, actualización y baja de registros.
+
+### Inicialización de Grupos en Consola Django:
+
 ```bash
 python manage.py shell
 ```
+
 ```python
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from pages.models import Resource
 from django.contrib.auth import get_user_model
+from pages.models import Resource
 
-content_type = ContentType.objects.get_for_model(Resource)
-p_view = Permission.objects.get(content_type=content_type, codename="view_resource")
-p_add = Permission.objects.get(content_type=content_type, codename="add_resource")
-p_change = Permission.objects.get(content_type=content_type, codename="change_resource")
-p_delete = Permission.objects.get(content_type=content_type, codename="delete_resource")
+# Obtención de permisos del modelo Resource
+tipo_contenido = ContentType.objects.get_for_model(Resource)
+perm_ver = Permission.objects.get(content_type=tipo_contenido, codename="view_resource")
+perm_crear = Permission.objects.get(content_type=tipo_contenido, codename="add_resource")
+perm_editar = Permission.objects.get(content_type=tipo_contenido, codename="change_resource")
+perm_borrar = Permission.objects.get(content_type=tipo_contenido, codename="delete_resource")
 
-# Grupo Revisores
-reviewers, _ = Group.objects.get_or_create(name="Catalog reviewers")
-reviewers.permissions.set([p_view])
+# Creación de grupo Revisores
+grupo_revisores, _ = Group.objects.get_or_create(name="Catalog reviewers")
+grupo_revisores.permissions.set([perm_ver])
 
-# Grupo Editores
-editors, _ = Group.objects.get_or_create(name="Catalog editors")
-editors.permissions.set([p_view, p_add, p_change, p_delete])
+# Creación de grupo Editores
+grupo_editores, _ = Group.objects.get_or_create(name="Catalog editors")
+grupo_editores.permissions.set([perm_ver, perm_crear, perm_editar, perm_borrar])
 
-# Asignar a un usuario
-User = get_user_model()
-editor_user = User.objects.get(username="tu_usuario")
-editor_user.groups.add(editors)
+# Asignar un usuario al rol de Editor
+Usuario = get_user_model()
+cuenta_usuario = Usuario.objects.get(username="nombre_de_usuario")
+cuenta_usuario.groups.add(grupo_editores)
 ```
 
 ---
 
-## 🛠️ Entorno y Conexión a Base de Datos
+## ⚙️ Conectividad y Variables de Entorno
 
-ClassroomHub utiliza **MySQL / MariaDB** configurado mediante variables de entorno en `.env`:
+La conexión a la base de datos MySQL/MariaDB se administra mediante desacoplamiento en el archivo `.env`:
 
 ```env
 DB_NAME=classroomhub_db
@@ -105,19 +109,20 @@ DB_PORT=3306
 
 ---
 
-## 🧪 Ejecución de la Suite de Pruebas
+## 🔬 Suite de Pruebas Automatizadas
 
-ClassroomHub cuenta con **55 pruebas automatizadas**:
-- **10 pruebas** del Laboratorio 07 (Modelos, relaciones `PROTECT`, representaciones y vistas).
-- **12 pruebas** de Autenticación y Sesiones (Registro, validación, login, logout POST, CSRF).
-- **6 pruebas** de Permisos y Revisión de Catálogo (HTTP 403, grupos).
-- **6 pruebas** de `ResourceForm` (Validación de título, longitud mínima, espacios en blanco, categorías).
-- **4 pruebas** de `ResourceDetailView` (Consulta pública, contenido, 404 para inexistentes).
-- **6 pruebas** de `ResourceCreateView` (Redirección anónima, 403 para usuarios sin permiso, alta exitosa y errores).
-- **6 pruebas** de `ResourceUpdateView` (Protección 403, persistencia sin duplicar PK, 404 en edición).
-- **5 pruebas** de `ResourceDeleteView` (Protección 403, GET no elimina, POST elimina y redirige).
+El proyecto cuenta con **55 casos de prueba unitarios y de integración** que validan la robustez de la lógica de negocio:
 
-Para ejecutar las 55 pruebas en la base descartable `test_classroom_hub`:
+- **10 pruebas de Modelos y Relaciones** (Integridad referencial `PROTECT`, representaciones `__str__` y consultas básicas).
+- **12 pruebas de Autenticación y Ciclo de Vida de Sesiones** (Altas, inicio de sesión, desconexión por POST, tokens CSRF).
+- **6 pruebas de Control de Acceso y Permisos** (Validación de respuestas HTTP 403 y pertenencia a grupos).
+- **6 pruebas de Formulario (`ResourceForm`)** (Validaciones estrictas de título, espacios, longitudes y categorías).
+- **4 pruebas de Detalle (`ResourceDetailView`)** (Disponibilidad pública y tratamiento de claves inexistentes con 404).
+- **6 pruebas de Creación (`ResourceCreateView`)** (Redirección para anónimos, rechazo 403 y altas exitosas).
+- **6 pruebas de Edición (`ResourceUpdateView`)** (Blindaje contra modificaciones no autorizadas, preservación de ID y 404).
+- **5 pruebas de Eliminación (`ResourceDeleteView`)** (Invariabilidad del modelo bajo peticiones GET, supresión efectiva por POST).
+
+### Instrucciones para Correr la Suite:
 
 ```bash
 cd classroom-hub
@@ -125,7 +130,7 @@ cd classroom-hub
 python manage.py test pages
 ```
 
-**Resultado esperado:**
+**Salida de éxito esperada:**
 ```text
 Creating test database for alias 'default'...
 .......................................................
@@ -139,10 +144,12 @@ Found 55 test(s).
 
 ---
 
-## 💻 Ejecución del Servidor Local
+## 🚀 Despliegue Local
+
+Para levantar el servidor de desarrollo local:
 
 ```bash
 python manage.py runserver
 ```
 
-Abre en tu navegador: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+Acceso disponible en: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)

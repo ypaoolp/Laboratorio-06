@@ -3,15 +3,49 @@
 {% block title %}Home | ClassroomHub{% endblock %}
 
 {% block content %}
-<div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(to bottom, #ffffff, #f1f5f9);">
-    <h2 style="font-size: 2.25rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem;">Welcome to ClassroomHub</h2>
-    <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem auto;">
+<div class="card" style="text-align: center; padding: 4.5rem 2rem; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid var(--border); box-shadow: var(--shadow-md);">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary-light); color: var(--primary); padding: 0.4rem 1rem; border-radius: 999px; font-weight: 600; font-size: 0.85rem; margin-bottom: 1.5rem; border: 1px solid rgba(79, 70, 229, 0.15);">
+        ✨ Portal de Recursos Educativos
+    </div>
+
+    <h2 style="font-size: 2.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem; letter-spacing: -0.025em;">
+        Welcome to ClassroomHub
+    </h2>
+
+    <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 620px; margin: 0 auto 2.25rem auto; line-height: 1.7;">
         {{ welcome_message }}
     </p>
-    <p>
-        <a href="{% url 'pages:resources' %}" style="display: inline-block; background-color: var(--primary); color: white; padding: 0.85rem 1.75rem; font-weight: 600; border-radius: 8px; text-decoration: none; box-shadow: var(--shadow-sm); transition: background-color 0.2s;">
+
+    <div>
+        <a href="{% url 'pages:resources' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 0.95rem 2.25rem; font-weight: 600; font-size: 1.05rem; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35); transition: all 0.2s ease;">
             Explore resources →
         </a>
-    </p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+    <div class="card" style="padding: 1.75rem; border-top: 4px solid var(--primary); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="font-size: 1.75rem; margin-bottom: 0.75rem;">📚</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Catálogo Centralizado</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
+            Explora una amplia variedad de recursos y guías de estudio organizadas por categorías especializadas.
+        </p>
+    </div>
+
+    <div class="card" style="padding: 1.75rem; border-top: 4px solid var(--accent); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="font-size: 1.75rem; margin-bottom: 0.75rem;">👥</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Acceso y Seguridad</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
+            Autenticación de usuarios y permisos basados en roles para revisores y editores de contenido.
+        </p>
+    </div>
+
+    <div class="card" style="padding: 1.75rem; border-top: 4px solid var(--success); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="font-size: 1.75rem; margin-bottom: 0.75rem;">⚡</div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--secondary); margin-bottom: 0.5rem;">Arquitectura MTV</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
+            Desarrollado sobre Django 6.1 y MySQL, garantizando alto rendimiento y pruebas automatizadas.
+        </p>
+    </div>
 </div>
 {% endblock %}
